@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prenota Spin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f7f7f7;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        p {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .summary {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Prenota Spin</h1>
+        <form id="spinForm">
+            <label for="username">Nome Utente:</label><br>
+            <input type="text" id="username" name="username" required><br>
+            <label for="email">Email (usata per mandarti il codice per giocare):</label><br>
+            <input type="email" id="email" name="email" required><br>
+            <label for="spinNumber">Numero di Spin (1€ l'uno):</label><br>
+            <input type="number" id="spinNumber" name="spinNumber" min="1" required><br>
+            <button type="submit">Prenota Spin</button>
+        </form>
+        <div id="summary" class="summary" style="display: none;"></div>
+        <hr>
+        <h2>Termini di Utilizzo</h2>
+        <p>Il presente sito è stato creato da "IlGattoSteamPunk".</p>
+        <p>I dati inseriti nel modulo di prenotazione non verranno condivisi con nessuno.</p>
+    </div>
+
+    <script>
+        document.getElementById("spinForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            // Recupera i dati dal modulo
+            const formData = new FormData(event.target);
+
+            // Costruisci il corpo del messaggio
+            const message = {
+                username: formData.get("username"),
+                email: formData.get("email"),
+                spinNumber: parseInt(formData.get("spinNumber"))
+            };
+
+            // Calcola il costo totale degli spin
+            const totalCost = message.spinNumber * 1; // 1€ per ogni spin
+
+            // Invia i dati al webhook Discord come JSON
+            fetch("https://discord.com/api/webhooks/1238218472027324489/lj1UxZBAM6B4rpF1bA0snhR3j0_Wi6hqmC4wf3VeHOdMOogIwJCVgrC01tqVcGFVUykp", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    content: null,
+                    embeds: [{
+                        title: "Prenotazione Spin",
+                        fields: [
+                            { name: "Nome Utente", value: message.username },
+                            { name: "Email", value: message.email },
+                            { name: "Numero di Spin", value: message.spinNumber },
+                            { name: "Costo Totale", value: totalCost + "€" }
+                        ]
+                    }]
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Errore durante l\'invio dei dati.');
+                }
+                // Mostra il resoconto
+                document.getElementById("summary").innerHTML = `<h2>Resoconto Prenotazione</h2>
+                    <p><strong>Nome Utente:</strong> ${message.username}</p>
+                    <p><strong>Email:</strong> ${message.email}</p>
+                    <p><strong>Numero di Spin:</strong> ${message.spinNumber}</p>
+                    <p><strong>Costo Totale:</strong> ${totalCost}€</p>`;
+                document.getElementById("summary").style.display = "block";
+                alert("Prenotazione effettuata con successo!");
+            })
+            .catch(error => alert(error));
+        });
+    </script>
+</body>
+</html>
